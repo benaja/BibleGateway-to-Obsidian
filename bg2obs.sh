@@ -67,12 +67,16 @@ declare -a lengtharray # Declaring amount of chapters in each book
 biblename="Die Bibel"
 # Full names of the books of the Bible
 bookarray=("1. Mose" "2. Mose" "3. Mose" "4. Mose" "5. Mose" Josua Richter Ruth "1. Samuel" "2. Samuel" "1. Könige" "2. Könige" "1. Chronik" "2. Chronik" Esra Nehemiah Esther Hiob Psalmen Sprüche Prediger Hohelied Jesaja Jeremia Klagelieder Hesekiel Daniel Hosea Joel Amos Obadja Jona Micha Nahum Habakuk Zephanja Haggai Sacharja Maleachi Matthäus Markus Lukas Johannes Apostelgeschichte Römer "1. Korinther" "2. Korinther" Galater Epheser Philipper Kolosser "1. Thessalonicher" "2. Thessalonicher" "1. Timotheus" "2. Timotheus" Titus Philemon Hebräer Jakobus "1. Petrus" "2. Petrus" "1. Johannes" "2. Johannes" "3. Johannes" Judas Offenbarung)
+# aliases=("1.Mo" "2.Mo" "3.Mo" "4.Mo" "5.Mo" "Jos" "Ri" "Ru" "1.Sa" "2.Sa" "1.Kö" "2.Kö" "1.Ch" "2.Ch" "Esr" "Neh" "Est" "Hi" "Ps" "Spr" "Hoh" "Jes" "Jer" "Kla" "Hes" "Da" "Hos" "Joel" "Am" "Ob" "Jon""Mi" "Na" "Hab" "Ze" "Hag" "Sach" "Mal" "Mat" "Mar" "Luk" "Joh" "Apg" "Röm" "1.Ko")
+# bookarray=("1. Mose")
 # Short names of the books of the Bible
-abbarray=(1Mo 2Mo 3Mo 4Mo 5Mo Jos Ri Ru 1Sa 2Sa 1Kö 2Kö 1Ch 2Ch Esr Ne Est Hi Ps Spr Pr Hoh Jes Jer Klg Hes Da Hos Joel Am Ob Jon Mi Nah Hab Ze Hag Sach Mal Mat Mar Luk Joh Apg Rö 1Ko 2Ko Gal Eph Php Kol 1Th 2Th 1Ti 2Ti Tit Phm Heb Jak 1Pe 2Pe 1Jo 2Jo 3Jo Jud Off)
+abbarray=(1Mo 2Mo 3Mo 4Mo 5Mo Jos Ri Ru 1Sa 2Sa 1Kö 2Kö 1Ch 2Ch Esr Ne Est Hi Ps Spr Pr Hoh Jes Jer Klg Hes Da Hos Joel Am Ob Jon Mi Nah Hab Ze Hag Sach Mal Mat Mar Luk Joh Apg Röm 1Ko 2Ko Gal Eph Phil Kol 1Th 2Th 1Ti 2Ti Tit Phm Heb Jak 1Pe 2Pe 1Jo 2Jo 3Jo Jud Off)
+# abbarray=(1MO)
 # -------------------------------------------
 
 # Book chapter list
 lengtharray=(50 40 27 36 34 24 21 4 31 24 22 25 29 36 10 13 10 42 150 31 12 8 66 52 5 48 12 14 3 9 1 4 7 3 3 3 2 14 4 28 16 24 21 28 16 16 13 6 6 4 4 5 3 6 4 3 1 13 5 5 3 5 1 1 1 22)
+# lengtharray=(5)
 
 # Initialise the "The Bible" file for all of the books
 echo -e "# ${biblename}\n" >> "${biblename}.md"
@@ -116,19 +120,19 @@ filename=${export_prefix}$chapter # Setting the filename
   next_file=${export_prefix}$next_chapter
 
   # Formatting Navigation and omitting links that aren't necessary
-  if [ ${maxchapter} -eq 1 ]; then
-    # For a book that only has one chapter
-    navigation="[[${book}]]"
-  elif [ ${chapter} -eq ${maxchapter} ]; then
-    # If this is the last chapter of the book
-    navigation="[[${prev_file}|← ${book} ${prev_chapter}]] | [[${book}]]"
-  elif [ ${chapter} -eq 1 ]; then
-    # If this is the first chapter of the book
-    navigation="[[${book}]] | [[${next_file}|${book} ${next_chapter} →]]"
-  else
-    # Navigation for everything else
-    navigation="[[${prev_file}|← ${book} ${prev_chapter}]] | [[${book}]] | [[${next_file}|${book} ${next_chapter} →]]"
-  fi
+  # if [ ${maxchapter} -eq 1 ]; then
+  #   # For a book that only has one chapter
+  #   navigation="[[${book}]]"
+  # elif [ ${chapter} -eq ${maxchapter} ]; then
+  #   # If this is the last chapter of the book
+  #   navigation="[[${prev_file}|← ${book} ${prev_chapter}]] | [[${book}]]"
+  # elif [ ${chapter} -eq 1 ]; then
+  #   # If this is the first chapter of the book
+  #   navigation="[[${book}]] | [[${next_file}|${book} ${next_chapter} →]]"
+  # else
+  #   # Navigation for everything else
+  #   navigation="[[${prev_file}|← ${book} ${prev_chapter}]] | [[${book}]] | [[${next_file}|${book} ${next_chapter} →]]"
+  # fi
 
   if ${boldwords} -eq "true" && ${headers} -eq "false"; then
     text=$(ruby bg2md.rb -e -c -b -f -l -r -v "${translation}" "${book} ${chapter}") # This calls the 'bg2md_mod' script
@@ -140,16 +144,19 @@ filename=${export_prefix}$chapter # Setting the filename
     text=$(ruby bg2md.rb -e -c -f -l -r -v "${translation}" "${book} ${chapter}") # This calls the 'bg2md_mod' script
   fi
 
-
   text=$(echo $text | sed 's/^(.*?)v1/v1/') # Deleting unwanted headers
+
+
 
   # Formatting the title for markdown
   title="# ${book} ${chapter}"
 
+  meta="---\ntags: #📖\alias: ${title}\n---"
+
   # Navigation format
-  export="${title}\n\n$navigation\n***\n\n$text\n\n***\n$navigation"
+  export="${title}\n$text"
   if ${aliases} -eq "true"; then
-    alias="---\nAliases: [${book} ${chapter}]\n---\n" # Add other aliases or 'Tags:' here if desired. Make sure to follow proper YAML format.
+    alias="---\ntags: #📖\naliases: [${book} ${chapter}]\n---\n" # Add other aliases or 'Tags:' here if desired. Make sure to follow proper YAML format.
     export="${alias}${export}"
   fi
   
@@ -158,8 +165,8 @@ filename=${export_prefix}$chapter # Setting the filename
   echo -e $export >> "$filename.md"
 
   # Creating a folder
-
-  folder_name="${book}" # Setting the folder name
+  booknumber=$(printf %02d $[$book_counter+1])
+  folder_name="${booknumber} - ${book}" # Setting the folder name
 
   # Creating a folder for the book of the Bible if it doesn't exist, otherwise moving new file into existing folder
   mkdir -p "./${biblename} (${translation})/${folder_name}"; mv "${filename}".md "./${biblename} (${translation})/${folder_name}"
@@ -167,13 +174,13 @@ filename=${export_prefix}$chapter # Setting the filename
 
 done # End of the book exporting loop
 
-  # Create an overview file for each book of the Bible:
-  overview_file="links: [[${biblename}]]\n# ${book}\n\n[[${abbreviation} 1|Start Reading →]]"
-  echo -e $overview_file >> "$book.md"
-  mv "$book.md" "./${biblename} (${translation})/${folder_name}"
+  # # Create an overview file for each book of the Bible:
+  # overview_file="links: [[${biblename}]]\n# ${book}\n\n[[${abbreviation} 1|Start Reading →]]"
+  # echo -e $overview_file >> "$book.md"
+  # mv "$book.md" "./${biblename} (${translation})/${folder_name}"
 
-  # Append the bookname to "The Bible" file
-  echo -e "* [[${book}]]" >> "${biblename}.md"
+  # # Append the bookname to "The Bible" file
+  # echo -e "* [[${book}]]" >> "${biblename}.md"
   done
 
 # Tidy up the Markdown files by removing unneeded headers and separating the verses
@@ -190,8 +197,10 @@ fi
 # Clear unnecessary headers
 find . -name "*.md" -print0 | xargs -0 perl -pi -e 's/#.*(#####\D[1]\D)/#$1/g'
 
+find . -name "*.md" -print0 | xargs -0 perl -pi -e 's/^\#\s.*$/g'
+
 # Format verses into H6 headers
-find . -name "*.md" -print0 | xargs -0 perl -pi -e 's/######\s([0-9]\s|[0-9][0-9]\s|[0-9][0-9][0-9]\s)/\n\n###### $1\n/g'
+find . -name "*.md" -print0 | xargs -0 perl -pi -e 's/######\s([0-9]\s|[0-9][0-9]\s|[0-9][0-9][0-9]\s)/\n###### $1\n/g'
 
 # Delete crossreferences
 find . -name "*.md" -print0 | xargs -0 perl -pi -e 's/\<crossref intro.*crossref\>//g'
